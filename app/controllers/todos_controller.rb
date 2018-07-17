@@ -5,7 +5,6 @@ class TodosController < ApplicationController
   end
 
   def create
-    # binding.pry
     @todo = Todo.new(todo_params)
     @todo.save
     render json: @todo, status: :created
