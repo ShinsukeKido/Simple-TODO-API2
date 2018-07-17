@@ -5,16 +5,15 @@ class TodosController < ApplicationController
   end
 
   def create
-    binding.pry
-    todo_params = JSON.parse(request.body.read, {:symbolize_names => true})
+    # binding.pry
     @todo = Todo.new(todo_params)
     @todo.save
-    render json: @todo
+    render json: @todo, status: :created
   end
 
   private
 
-  # def todo_params
-  #   JSON.parse(request.body.read)
-  # end
+  def todo_params
+    params.permit(:title, :text)
+  end
 end
