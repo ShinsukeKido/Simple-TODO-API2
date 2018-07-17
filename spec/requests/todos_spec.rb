@@ -57,4 +57,27 @@ RSpec.describe TodosController, type: :request do
       expect(json['created_at']).to eq Todo.first.created_at.as_json
     end
   end
+
+  describe '#show' do
+    let(:todo) { create(:todo) }
+    let(:json) { JSON.parse(response.body) }
+
+    it 'HTTP ステータスコード 200 が返る' do
+      get "/todos/#{todo.id}"
+      expect(response.status).to eq 200
+    end
+
+    it '出力される JSON のキーが仕様通りである' do
+      get "/todos/#{todo.id}"
+      expect(json.keys).to eq %w[id title text created_at]
+    end
+
+    it '出力される JSON に、作成した todo の内容が正しく反映されている' do
+      get '/todos'
+      expect(jsons[0]['id']).to eq Todo.order(:created_at).first.id
+      expect(jsons[0]['title']).to eq Todo.order(:created_at).first.title
+      expect(jsons[0]['text']).to eq Todo.order(:created_at).first.text
+      expect(jsons[0]['created_at']).to eq Todo.order(:created_at).first.created_at.as_json
+    end
+  end
 end

@@ -10,6 +10,11 @@ class TodosController < ApplicationController
     render json: @todo, status: :created
   end
 
+  def show
+    @todo = Todo.find(params[:id])
+    render json: @todo
+  end
+
   private
 
   def todo_params
