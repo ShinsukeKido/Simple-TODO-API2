@@ -11,6 +11,7 @@ gem 'active_model_serializers'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 3.11'
+gem 'rack-cors'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
@@ -27,6 +28,7 @@ end
 group :test do
   gem 'factory_bot_rails'
   gem 'rails-controller-testing'
+  gem 'rspec-json_matcher'
   gem 'rspec-rails'
   gem 'shoulda-matchers'
 end

@@ -94,3 +94,6 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = :random
 end
+
+require "rspec/json_matcher"
+RSpec.configuration.include RSpec::JsonMatcher

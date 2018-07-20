@@ -35,5 +35,7 @@ module SimpleTodoApi
     config.generators do |g|
       g.orm :active_record, primary_key_type: :uuid
     end
+
+    config.i18n.default_locale = :ja
   end
 end

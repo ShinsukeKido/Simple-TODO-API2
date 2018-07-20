@@ -49,6 +49,7 @@ GEM
       tzinfo (~> 1.1)
     arel (9.0.0)
     ast (2.4.0)
+    awesome_print (1.8.0)
     bootsnap (1.3.0)
       msgpack (~> 1.0)
     builder (3.2.3)
@@ -70,6 +71,7 @@ GEM
       activesupport (>= 4.2.0)
     i18n (1.0.1)
       concurrent-ruby (~> 1.0)
+    json (2.1.0)
     jsonapi-renderer (0.2.0)
     listen (3.1.5)
       rb-fsevent (~> 0.9, >= 0.9.4)
@@ -103,6 +105,7 @@ GEM
       pry (>= 0.10.4)
     puma (3.11.4)
     rack (2.0.5)
+    rack-cors (1.0.2)
     rack-test (1.0.0)
       rack (>= 1.0, < 3)
     rails (5.2.0)
@@ -143,6 +146,9 @@ GEM
     rspec-expectations (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
+    rspec-json_matcher (0.1.6)
+      awesome_print
+      json
     rspec-mocks (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
@@ -199,8 +205,10 @@ DEPENDENCIES
   pg (>= 0.18, < 2.0)
   pry-rails
   puma (~> 3.11)
+  rack-cors
   rails (~> 5.2.0)
   rails-controller-testing
+  rspec-json_matcher
   rspec-rails
   rubocop (= 0.55.0)
   shoulda-matchers

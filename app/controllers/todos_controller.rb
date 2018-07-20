@@ -2,11 +2,13 @@ class TodosController < ApplicationController
   def index
     @todos = Todo.all
     render json: @todos
+  rescue
+    render json: { errors: [{ title: '不正なリクエストです。', status: 400 }] }, status: :bad_request
   end
 
   def create
     @todo = Todo.new(todo_params)
-    @todo.save
+    @todo.save!
     render json: @todo, status: :created
   end
 
@@ -17,7 +19,7 @@ class TodosController < ApplicationController
 
   def update
     @todo = Todo.find(params[:id])
-    @todo.update(todo_params)
+    @todo.update!(todo_params)
     render json: @todo
   end
 

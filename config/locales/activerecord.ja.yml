@@ -1,0 +1,8 @@
+ja:
+  activerecord:
+    models:
+      todo: トゥードゥー
+    attributes:
+      todo:
+        title: タイトル
+        text: テキスト
