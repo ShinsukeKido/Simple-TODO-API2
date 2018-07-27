@@ -2,8 +2,6 @@ require 'rails_helper'
 
 RSpec.describe TodosController, type: :request do
   describe '#index' do
-    let(:jsons) { JSON.parse(response.body) }
-
     before { 3.times { create(:todo) } }
 
     it 'HTTP ステータスコード 200 が返る' do
@@ -11,52 +9,26 @@ RSpec.describe TodosController, type: :request do
       expect(response.status).to eq 200
     end
 
-    it 'todo が作成された数だけ JSON 出力される' do
+    it 'todo が作成された数だけ JSON 形式で返る' do
       get '/todos'
-      expect(jsons.count).to eq 3
+      json = JSON.parse(response.body)
+      expect(json.count).to eq 3
     end
 
-    it '出力される JSON のキーが仕様通りである' do
+    it '返す JSON に、作成した todo の内容が正しく反映されている' do
       get '/todos'
-      expect(jsons[0].keys).to eq %w[id title text created_at]
-    end
-
-    it '出力される JSON に、作成した todo の内容が正しく反映されている' do
-      get '/todos'
-      todo = Todo.order(:created_at)
-      expected_response = [
-        {
-         "id"         => todo.first.id,
-         "title"      => todo.first.title,
-         "text"       => todo.first.text,
-         "created_at" => todo.first.created_at.as_json
-       },
-        {
-         "id"         => todo.second.id,
-         "title"      => todo.second.title,
-         "text"       => todo.second.text,
-         "created_at" => todo.second.created_at.as_json
-       },
-        {
-         "id"         => todo.third.id,
-         "title"      => todo.third.title,
-         "text"       => todo.third.text,
-         "created_at" => todo.third.created_at.as_json
-       }
-     ]
-      expect(response.body).to be_json_as(expected_response)
-      expect(jsons).to eq expected_response
-      expect(jsons[0]['id']).to eq Todo.order(:created_at).first.id
-      expect(jsons[0]['title']).to eq Todo.order(:created_at).first.title
-      expect(jsons[0]['text']).to eq Todo.order(:created_at).first.text
-      expect(jsons[0]['created_at']).to eq Todo.order(:created_at).first.created_at.as_json
+      json = JSON.parse(response.body)
+      todo = Todo.order(:created_at).first
+      expect(json[0]['id']).to eq todo.id
+      expect(json[0]['title']).to eq todo.title
+      expect(json[0]['text']).to eq todo.text
+      expect(json[0]['created_at']).to eq todo.created_at.as_json
     end
   end
 
   describe '#create' do
     context '正常' do
       let(:todo_params) { { title: 'title', text: 'text' } }
-      let(:json) { JSON.parse(response.body) }
 
       it 'HTTP ステータスコード 201 が返る' do
         post '/todos', params: todo_params
@@ -67,23 +39,17 @@ RSpec.describe TodosController, type: :request do
         expect { post '/todos', params: todo_params }.to change { Todo.count }.by(1)
       end
 
-      it '出力される JSON のキーが仕様通りである' do
+      it '返す JSON に、作成した todo の内容が正しく反映されている' do
         post '/todos', params: todo_params
-        expect(json.keys).to eq %w[id title text created_at]
-      end
-
-      it '出力される JSON に、作成した todo の内容が正しく反映されている' do
-        post '/todos', params: todo_params
-        expect(json['id']).to eq Todo.first.id
-        expect(json['title']).to eq Todo.first.title
-        expect(json['text']).to eq Todo.first.text
-        expect(json['created_at']).to eq Todo.first.created_at.as_json
+        json = JSON.parse(response.body)
+        todo = Todo.order(:created_at).first
+        expect(json['title']).to eq todo.title
+        expect(json['text']).to eq todo.text
       end
     end
 
     context '異常' do
-      let(:todo_params) { { title: 'title'} }
-      let(:json) { JSON.parse(response.body) }
+      let(:todo_params) { { title: 'title' } }
 
       it 'HTTP ステータスコード 201 が返る' do
         post '/todos', params: todo_params
@@ -96,14 +62,15 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         post '/todos', params: todo_params
+        json = JSON.parse(response.body)
         expected_response = {
-          "errors" => [
+          'errors' => [
             {
-              "title" => "バリデーションに失敗しました",
-              "status" => 422,
-              "source" => { "pointer"=> "/data/attributes/text" }
-            }
-          ]
+              'title' => 'バリデーションに失敗しました',
+              'status' => 422,
+              'source' => { 'pointer' => '/data/attributes/text' },
+            },
+          ],
         }
         expect(json).to eq expected_response
       end
@@ -113,7 +80,6 @@ RSpec.describe TodosController, type: :request do
   describe '#show' do
     context '正常' do
       let(:todo) { create(:todo) }
-      let(:json) { JSON.parse(response.body) }
 
       it 'HTTP ステータスコード 200 が返る' do
         get "/todos/#{todo.id}"
@@ -122,11 +88,13 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         get "/todos/#{todo.id}"
+        json = JSON.parse(response.body)
         expect(json.keys).to include('id', 'title', 'text', 'created_at')
       end
 
       it '出力される JSON に、作成した todo の内容が正しく反映されている' do
         get "/todos/#{todo.id}"
+        json = JSON.parse(response.body)
         expect(json['id']).to eq todo.id
         expect(json['title']).to eq todo.title
         expect(json['text']).to eq todo.text
@@ -135,8 +103,6 @@ RSpec.describe TodosController, type: :request do
     end
 
     context '異常' do
-      let(:json) { JSON.parse(response.body) }
-
       it 'HTTP ステータスコード 200 が返る' do
         get '/todos/hoge'
         expect(response.status).to eq 404
@@ -144,13 +110,14 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         get '/todos/hoge'
+        json = JSON.parse(response.body)
         expected_response = {
-          "errors" => [
+          'errors' => [
             {
-              "title" => "見つかりませんでした",
-              "status" => 404
-            }
-          ]
+              'title' => '見つかりませんでした',
+              'status' => 404,
+            },
+          ],
         }
         expect(json).to eq expected_response
       end
@@ -161,7 +128,6 @@ RSpec.describe TodosController, type: :request do
     context '正常' do
       let(:todo) { create(:todo, title: 'before') }
       let(:todo_params) { { title: 'after', text: 'text' } }
-      let(:json) { JSON.parse(response.body) }
 
       it 'HTTP ステータスコード 200 が返る' do
         put "/todos/#{todo.id}", params: todo_params
@@ -174,11 +140,13 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         put "/todos/#{todo.id}", params: todo_params
+        json = JSON.parse(response.body)
         expect(json.keys).to contain_exactly('id', 'title', 'text', 'created_at')
       end
 
       it '出力される JSON に、更新した todo の内容が正しく反映されている' do
         put "/todos/#{todo.id}", params: todo_params
+        json = JSON.parse(response.body)
         expect(json['id']).to eq Todo.first.id
         expect(json['title']).to eq Todo.first.title
         expect(json['text']).to eq Todo.first.text
@@ -189,7 +157,6 @@ RSpec.describe TodosController, type: :request do
     context '異常' do
       let(:todo) { create(:todo, title: 'before') }
       let(:todo_params) { { title: 'after', text: '' } }
-      let(:json) { JSON.parse(response.body) }
 
       it 'HTTP ステータスコード 200 が返る' do
         put "/todos/#{todo.id}", params: todo_params
@@ -202,14 +169,15 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         put "/todos/#{todo.id}", params: todo_params
+        json = JSON.parse(response.body)
         expected_response = {
-          "errors" => [
+          'errors' => [
             {
-              "title" => "バリデーションに失敗しました",
-              "status" => 422,
-              "source" => { "pointer"=> "/data/attributes/text" }
-            }
-          ]
+              'title' => 'バリデーションに失敗しました',
+              'status' => 422,
+              'source' => { 'pointer' => '/data/attributes/text' },
+            },
+          ],
         }
         expect(json).to eq expected_response
       end
@@ -218,7 +186,6 @@ RSpec.describe TodosController, type: :request do
 
   describe '#destroy' do
     context '正常' do
-      let(:json) { JSON.parse(response.body) }
       let!(:todo) { create(:todo) }
 
       it 'HTTP ステータスコード 200 が返る' do
@@ -232,11 +199,13 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         delete "/todos/#{todo.id}"
+        json = JSON.parse(response.body)
         expect(json.keys).to contain_exactly('id', 'title', 'text', 'created_at')
       end
 
       it '出力される JSON に、削除した todo の内容が正しく反映されている' do
         delete "/todos/#{todo.id}"
+        json = JSON.parse(response.body)
         expect(json['id']).to eq todo.id
         expect(json['title']).to eq todo.title
         expect(json['text']).to eq todo.text
@@ -245,8 +214,6 @@ RSpec.describe TodosController, type: :request do
     end
 
     context '異常' do
-      let(:json) { JSON.parse(response.body) }
-
       it 'HTTP ステータスコード 404 が返る' do
         delete '/todos/hoge'
         expect(response.status).to eq 404
@@ -258,13 +225,14 @@ RSpec.describe TodosController, type: :request do
 
       it '出力される JSON のキーが仕様通りである' do
         delete '/todos/hoge'
+        json = JSON.parse(response.body)
         expected_response = {
-          "errors" => [
+          'errors' => [
             {
-              "title" => "見つかりませんでした",
-              "status" => 404
-            }
-          ]
+              'title' => '見つかりませんでした',
+              'status' => 404,
+            },
+          ],
         }
         expect(json).to eq expected_response
       end

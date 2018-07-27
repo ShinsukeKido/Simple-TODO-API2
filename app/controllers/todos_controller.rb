@@ -1,7 +1,9 @@
 class TodosController < ApplicationController
+  before_action :set_todo, only: [:show, :update, :destroy]
+
   def index
-    @todos = Todo.all
-    render json: @todos
+    todos = Todo.all
+    render json: todos
   rescue
     render json: { errors: [{ title: '不正なリクエストです。', status: 400 }] }, status: :bad_request
   end
@@ -13,18 +15,15 @@ class TodosController < ApplicationController
   end
 
   def show
-    @todo = Todo.find(params[:id])
     render json: @todo
   end
 
   def update
-    @todo = Todo.find(params[:id])
     @todo.update!(todo_params)
     render json: @todo
   end
 
   def destroy
-    @todo = Todo.find(params[:id])
     @todo.destroy
     render json: @todo
   end
@@ -33,5 +32,9 @@ class TodosController < ApplicationController
 
   def todo_params
     params.permit(:title, :text)
+  end
+
+  def set_todo
+    @todo = Todo.find(params[:id])
   end
 end

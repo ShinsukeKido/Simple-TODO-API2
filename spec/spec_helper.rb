@@ -95,5 +95,5 @@ RSpec.configure do |config|
   config.order = :random
 end
 
-require "rspec/json_matcher"
+require 'rspec/json_matcher'
 RSpec.configuration.include RSpec::JsonMatcher
